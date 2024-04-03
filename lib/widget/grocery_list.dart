@@ -55,6 +55,8 @@ class _GroceryListState extends State<GroceryList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Icon(Icons.shopping_bag_outlined, size: 50),
+          SizedBox(height: 2),
           Text(
             'No items found.',
             style: TextStyle(
@@ -102,7 +104,7 @@ class _GroceryListState extends State<GroceryList> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your Groceries'),
+        title: const Text('My Grocery List'),
         actions: [
           IconButton(
             onPressed: _addItem,

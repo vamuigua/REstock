@@ -51,21 +51,26 @@ class _GroceryListState extends State<GroceryList> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = const Center(
+    Widget content = Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_bag_outlined, size: 50),
-          SizedBox(height: 2),
-          Text(
+          const Icon(Icons.shopping_basket_outlined, size: 50),
+          const SizedBox(height: 2),
+          const Text(
             'No items found.',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 10),
-          Text('Click on the add button to Get started!'),
+          const SizedBox(height: 10),
+          const Text("Click on the '+' button to get started!"),
+          const SizedBox(height: 10),
+          ElevatedButton(
+            onPressed: _addItem,
+            child: const Icon(Icons.add),
+          ),
         ],
       ),
     );
@@ -104,7 +109,7 @@ class _GroceryListState extends State<GroceryList> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Grocery List'),
+        title: const Text('REstock'),
         actions: [
           IconButton(
             onPressed: _addItem,

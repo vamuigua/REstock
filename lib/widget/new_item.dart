@@ -55,7 +55,7 @@ class _NewItemState extends State<NewItem> {
                       value.isEmpty ||
                       value.trim().length <= 1 ||
                       value.trim().length > 50) {
-                    return "Must be between 1 and 50 characters long";
+                    return "Must be between 2 and 50 characters long";
                   }
                   return null;
                 },

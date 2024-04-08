@@ -21,14 +21,14 @@ class _NewItemState extends State<NewItem> {
   var _enteredQuantity = 1;
   var _selectedCategory = categories[Categories.vegetables]!;
 
-  void _saveItem() {
+  void _saveItem() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
       final url = Uri.https(
           "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
           "shopping-list.json");
 
-      http.post(url,
+      final response = await http.post(url,
           headers: {"Content-type": "application/json"},
           body: json.encode({
             'name': _enteredName,
@@ -36,14 +36,14 @@ class _NewItemState extends State<NewItem> {
             'category': _selectedCategory.title,
           }));
 
-      Navigator.of(context).pop(
-          // GroceryItem(
-          //   id: DateTime.now().toString(),
-          //   name: _enteredName,
-          //   quantity: _enteredQuantity,
-          //   category: _selectedCategory,
-          // ),
-          );
+      // print(response.body);
+      // print(response.statusCode);
+
+      if (!context.mounted) {
+        return;
+      }
+
+      Navigator.of(context).pop();
     }
   }
 

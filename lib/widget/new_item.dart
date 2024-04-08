@@ -28,16 +28,13 @@ class _NewItemState extends State<NewItem> {
           "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
           "shopping-list.json");
 
-      final response = await http.post(url,
+      await http.post(url,
           headers: {"Content-type": "application/json"},
           body: json.encode({
             'name': _enteredName,
             'quantity': _enteredQuantity,
             'category': _selectedCategory.title,
           }));
-
-      // print(response.body);
-      // print(response.statusCode);
 
       if (!context.mounted) {
         return;

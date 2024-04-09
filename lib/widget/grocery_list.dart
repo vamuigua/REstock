@@ -80,26 +80,43 @@ class _GroceryListState extends State<GroceryList> {
     });
   }
 
-  void _removeItem(GroceryItem item) {
+  void _removeItem(GroceryItem item) async {
     final itemIndex = _groceryItems.indexOf(item);
 
     setState(() {
       _groceryItems.remove(item);
     });
 
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      duration: const Duration(seconds: 4),
-      content: const Text("🚮 Item deleted."),
-      action: SnackBarAction(
-        label: "Undo",
-        onPressed: () {
-          setState(() {
-            _groceryItems.insert(itemIndex, item);
-          });
-        },
-      ),
-    ));
+    final url = Uri.https(
+      "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
+      "shopping-list/${item.id}.json",
+    );
+
+    final response = await http.delete(url);
+
+    if (!context.mounted) {
+      return;
+    }
+
+    if (response.statusCode >= 400) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Something went wrong! Try again later."),
+        ),
+      );
+
+      setState(() {
+        _groceryItems.insert(itemIndex, item);
+      });
+    } else {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("🚮 Item deleted."),
+        ),
+      );
+    }
   }
 
   @override
@@ -148,6 +165,28 @@ class _GroceryListState extends State<GroceryList> {
             ),
             onDismissed: (direction) {
               _removeItem(_groceryItems[index]);
+            },
+            confirmDismiss: (direction) async {
+              return await showDialog<bool>(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Delete item'),
+                        content: const Text('Are you sure to delete?'),
+                        actions: [
+                          TextButton(
+                            child: const Text("Yes"),
+                            onPressed: () => Navigator.of(context).pop(true),
+                          ),
+                          TextButton(
+                            child: const Text("No"),
+                            onPressed: () => Navigator.of(context).pop(false),
+                          ),
+                        ],
+                      );
+                    },
+                  ) ??
+                  false;
             },
             child: ListTile(
               leading: Container(

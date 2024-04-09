@@ -40,6 +40,14 @@ class _GroceryListState extends State<GroceryList> {
       });
     }
 
+    if (response.body == 'null') {
+      setState(() {
+        _isLoading = false;
+      });
+
+      return;
+    }
+
     final Map<String, dynamic> listData = json.decode(response.body);
 
     final List<GroceryItem> loadedItems = [];
@@ -78,6 +86,17 @@ class _GroceryListState extends State<GroceryList> {
     setState(() {
       _groceryItems.add(newItem);
     });
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("✅ Item Added."),
+      ),
+    );
   }
 
   void _removeItem(GroceryItem item) async {
@@ -99,16 +118,16 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     if (response.statusCode >= 400) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Something went wrong! Try again later."),
-        ),
-      );
-
       setState(() {
         _groceryItems.insert(itemIndex, item);
       });
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("🚧 Something went wrong! Try again later."),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -171,16 +190,22 @@ class _GroceryListState extends State<GroceryList> {
                     context: context,
                     builder: (context) {
                       return AlertDialog(
-                        title: const Text('Delete item'),
-                        content: const Text('Are you sure to delete?'),
+                        title: const Text('Remove item'),
+                        content: const Text(
+                            'Are you sure you want to remove this item?'),
                         actions: [
                           TextButton(
-                            child: const Text("Yes"),
-                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text(
+                              "Cancel",
+                            ),
+                            onPressed: () => Navigator.of(context).pop(false),
                           ),
                           TextButton(
-                            child: const Text("No"),
-                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text(
+                              "Remove item",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                            onPressed: () => Navigator.of(context).pop(true),
                           ),
                         ],
                       );
@@ -215,9 +240,9 @@ class _GroceryListState extends State<GroceryList> {
       appBar: AppBar(
         title: const Text('REstock'),
         actions: [
-          IconButton(
+          ElevatedButton(
             onPressed: _addItem,
-            icon: const Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ],
       ),

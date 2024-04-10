@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/widget/new_item.dart';
+import 'package:shopping_list/widget/edit_item.dart';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -37,7 +38,7 @@ class _GroceryListState extends State<GroceryList> {
 
       if (response.statusCode >= 400) {
         setState(() {
-          _error = "Failed to fetch data. Please try again later.";
+          _error = "❌ Failed to fetch data. Please try again later.";
         });
       }
 
@@ -101,7 +102,38 @@ class _GroceryListState extends State<GroceryList> {
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
+        duration: Duration(seconds: 2),
         content: Text("✅ Item Added."),
+      ),
+    );
+  }
+
+  void _editItem(GroceryItem item) async {
+    final itemIndex = _groceryItems.indexOf(item);
+
+    final updatedItem = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (ctx) => EditItem(groceryItem: item),
+      ),
+    );
+
+    if (updatedItem == null) {
+      return;
+    }
+
+    setState(() {
+      _groceryItems[itemIndex] = updatedItem;
+    });
+
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        duration: Duration(seconds: 2),
+        content: Text("✅ Item Updated."),
       ),
     );
   }
@@ -133,14 +165,15 @@ class _GroceryListState extends State<GroceryList> {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("🚧 Something went wrong! Try again later."),
+            content: Text("❌ Something went wrong! Try again later."),
           ),
         );
       } else {
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text("🚮 Item deleted."),
+            duration: Duration(seconds: 2),
+            content: Text("✅ Item deleted."),
           ),
         );
       }
@@ -244,6 +277,9 @@ class _GroceryListState extends State<GroceryList> {
                 _groceryItems[index].quantity.toString(),
                 style: const TextStyle(fontSize: 15.0),
               ),
+              onTap: () {
+                _editItem(_groceryItems[index]);
+              },
             ),
           );
         },

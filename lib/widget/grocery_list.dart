@@ -173,7 +173,7 @@ class _GroceryListState extends State<GroceryList> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             duration: Duration(seconds: 2),
-            content: Text("✅ Item deleted."),
+            content: Text("✅ Item removed."),
           ),
         );
       }

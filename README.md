@@ -1,4 +1,4 @@
-![App Logo](assets/icon/restock_icon_smaller.png)
+![App Logo](assets/icon/restock_icon_smaller_2.png)
 
 # REstock 🛒
 
@@ -6,7 +6,7 @@ REstock is a Flutter mobile application designed to help users create and manage
 
 ## Demo 🎥
 
-![REstock Demo gif](/assets/Restock_Demo_smaller.gif)
+![REstock Demo gif](/assets/Restock_Demo_smaller_2.gif)
 
 ## Features ✨
 

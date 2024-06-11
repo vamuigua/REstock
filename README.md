@@ -61,7 +61,7 @@ While building REstock, I gained valuable experience and encountered various cha
 
 ## Roadmap & Improvements 🛠️
 
-- [ ] feat: Move "Add item" icon to bottom-right as a floating button
+- [x] UI: Move "Add item" icon to bottom navigation bar for easer reach
 - [ ] feat: Ability to pull-down to refresh data
 - [ ] feat: Filtering by category
 - [ ] feat: Ability to sync local storage & online data

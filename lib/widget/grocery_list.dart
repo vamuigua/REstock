@@ -293,14 +293,28 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     return Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        color: Theme.of(context).colorScheme.background,
+        shape: const CircularNotchedRectangle(),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ElevatedButton(
+              onPressed: _addItem,
+              style: ElevatedButton.styleFrom(
+                fixedSize: const Size(200, 200),
+                shape: const CircleBorder(),
+                foregroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              ),
+              child: const Icon(Icons.add, size: 30.0),
+            )
+          ],
+        ),
+      ),
       appBar: AppBar(
         title: const Text('REstock'),
-        actions: [
-          ElevatedButton(
-            onPressed: _addItem,
-            child: const Icon(Icons.add),
-          ),
-        ],
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: content,
     );

@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/data/categories.dart';
+// import 'package:shopping_list/data/dummy_items.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/widget/new_item.dart';
 import 'package:shopping_list/widget/edit_item.dart';
+import 'package:shopping_list/widget/custom_search_bar.dart';
 
 class GroceryList extends StatefulWidget {
   const GroceryList({super.key});
@@ -18,6 +20,7 @@ class GroceryList extends StatefulWidget {
 
 class _GroceryListState extends State<GroceryList> {
   List<GroceryItem> _groceryItems = [];
+  List<GroceryItem> _filteredItems = [];
   var _isLoading = true;
   String? _error;
 
@@ -27,10 +30,21 @@ class _GroceryListState extends State<GroceryList> {
     _loadItems();
   }
 
-  void _loadItems() async {
+  void _loadItems({String searchQuery = ''}) async {
+    Map<String, dynamic> queryParams = {};
+
+    if (searchQuery.isNotEmpty) {
+      queryParams = {
+        'orderBy': jsonEncode("name"),
+        'startAt': jsonEncode(searchQuery),
+        'endAt': jsonEncode("$searchQuery\uf8ff"),
+      };
+    }
+
     final url = Uri.https(
       "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
       "shopping-list.json",
+      queryParams,
     );
 
     try {
@@ -70,6 +84,7 @@ class _GroceryListState extends State<GroceryList> {
 
       setState(() {
         _groceryItems = loadedItems;
+        _filteredItems = loadedItems;
         _isLoading = false;
       });
     } catch (e) {
@@ -92,7 +107,7 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     setState(() {
-      _groceryItems.add(newItem);
+      _filteredItems.add(newItem);
     });
 
     if (!context.mounted) {
@@ -109,7 +124,7 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _editItem(GroceryItem item) async {
-    final itemIndex = _groceryItems.indexOf(item);
+    final itemIndex = _filteredItems.indexOf(item);
 
     final updatedItem = await Navigator.of(context).push(
       MaterialPageRoute(
@@ -122,7 +137,7 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     setState(() {
-      _groceryItems[itemIndex] = updatedItem;
+      _filteredItems[itemIndex] = updatedItem;
     });
 
     if (!context.mounted) {
@@ -139,10 +154,10 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _removeItem(GroceryItem item) async {
-    final itemIndex = _groceryItems.indexOf(item);
+    final itemIndex = _filteredItems.indexOf(item);
 
     setState(() {
-      _groceryItems.remove(item);
+      _filteredItems.remove(item);
     });
 
     final url = Uri.https(
@@ -159,7 +174,7 @@ class _GroceryListState extends State<GroceryList> {
 
       if (response.statusCode >= 400) {
         setState(() {
-          _groceryItems.insert(itemIndex, item);
+          _filteredItems.insert(itemIndex, item);
         });
 
         ScaffoldMessenger.of(context).clearSnackBars();
@@ -179,7 +194,7 @@ class _GroceryListState extends State<GroceryList> {
       }
     } catch (e) {
       setState(() {
-        _groceryItems.insert(itemIndex, item);
+        _filteredItems.insert(itemIndex, item);
       });
 
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -189,6 +204,18 @@ class _GroceryListState extends State<GroceryList> {
         ),
       );
     }
+  }
+
+  void _updateSearchResults(String newQuery) {
+    setState(() {
+      if (newQuery.isEmpty) {
+        _filteredItems = _groceryItems;
+      } else {
+        _filteredItems = _groceryItems.where((item) {
+          return item.name.toLowerCase().contains(newQuery.toLowerCase());
+        }).toList();
+      }
+    });
   }
 
   @override
@@ -223,12 +250,12 @@ class _GroceryListState extends State<GroceryList> {
       );
     }
 
-    if (_groceryItems.isNotEmpty) {
+    if (_filteredItems.isNotEmpty) {
       content = ListView.builder(
-        itemCount: _groceryItems.length,
+        itemCount: _filteredItems.length,
         itemBuilder: (ctx, index) {
           return Dismissible(
-            key: ValueKey(_groceryItems[index].id),
+            key: ValueKey(_filteredItems[index].id),
             background: Container(
               color: Theme.of(context).colorScheme.error,
               margin: const EdgeInsets.symmetric(
@@ -236,7 +263,7 @@ class _GroceryListState extends State<GroceryList> {
               ),
             ),
             onDismissed: (direction) {
-              _removeItem(_groceryItems[index]);
+              _removeItem(_filteredItems[index]);
             },
             confirmDismiss: (direction) async {
               return await showDialog<bool>(
@@ -270,15 +297,15 @@ class _GroceryListState extends State<GroceryList> {
               leading: Container(
                 width: 24,
                 height: 24,
-                color: _groceryItems[index].category.color,
+                color: _filteredItems[index].category.color,
               ),
-              title: Text(_groceryItems[index].name),
+              title: Text(_filteredItems[index].name),
               trailing: Text(
-                _groceryItems[index].quantity.toString(),
+                _filteredItems[index].quantity.toString(),
                 style: const TextStyle(fontSize: 15.0),
               ),
               onTap: () {
-                _editItem(_groceryItems[index]);
+                _editItem(_filteredItems[index]);
               },
             ),
           );
@@ -316,7 +343,14 @@ class _GroceryListState extends State<GroceryList> {
         title: const Text('REstock'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
-      body: content,
+      body: Column(
+        children: [
+          CustomSearchBar(onQueryChanged: _updateSearchResults),
+          Expanded(
+            child: content,
+          )
+        ],
+      ),
     );
   }
 }

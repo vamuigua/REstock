@@ -62,12 +62,12 @@ While building REstock, I gained valuable experience and encountered various cha
 ## Roadmap & Improvements 🛠️
 
 - [x] UI: Move "Add item" icon to bottom navigation bar for easier reach
+- [x] feat: Quickly find items using search functionality
 - [ ] feat: Ability to pull-down to refresh data
 - [ ] feat: Filtering by category
 - [ ] feat: Ability to sync local storage & online data
 - [ ] feat: Create multiple shopping lists
 - [ ] feat: Mark items as purchased to keep your lists up-to-date
-- [ ] feat: Quickly find items using search functionality
 - [ ] feat: Set reminders for important items or lists
 - [ ] feat: Ability to create custom categories
 

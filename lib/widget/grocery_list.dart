@@ -24,6 +24,8 @@ class _GroceryListState extends State<GroceryList> {
   var _isLoading = true;
   String? _error;
 
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -96,6 +98,8 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _addItem() async {
+    _clearSearch();
+
     final newItem = await Navigator.of(context).push<GroceryItem>(
       MaterialPageRoute(
         builder: (ctx) => const NewItem(),
@@ -107,7 +111,7 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     setState(() {
-      _filteredItems.add(newItem);
+      _groceryItems.add(newItem);
     });
 
     if (!context.mounted) {
@@ -124,6 +128,8 @@ class _GroceryListState extends State<GroceryList> {
   }
 
   void _editItem(GroceryItem item) async {
+    _clearSearch();
+
     final itemIndex = _filteredItems.indexOf(item);
 
     final updatedItem = await Navigator.of(context).push(
@@ -137,7 +143,7 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     setState(() {
-      _filteredItems[itemIndex] = updatedItem;
+      _groceryItems[itemIndex] = updatedItem;
     });
 
     if (!context.mounted) {
@@ -158,6 +164,7 @@ class _GroceryListState extends State<GroceryList> {
 
     setState(() {
       _filteredItems.remove(item);
+      _groceryItems.remove(item);
     });
 
     final url = Uri.https(
@@ -216,6 +223,11 @@ class _GroceryListState extends State<GroceryList> {
         }).toList();
       }
     });
+  }
+
+  void _clearSearch() {
+    _searchController.clear();
+    _updateSearchResults('');
   }
 
   @override
@@ -345,7 +357,10 @@ class _GroceryListState extends State<GroceryList> {
       ),
       body: Column(
         children: [
-          CustomSearchBar(onQueryChanged: _updateSearchResults),
+          CustomSearchBar(
+            onQueryChanged: _updateSearchResults,
+            controller: _searchController,
+          ),
           Expanded(
             child: content,
           )

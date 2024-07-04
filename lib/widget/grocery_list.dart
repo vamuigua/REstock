@@ -32,7 +32,7 @@ class _GroceryListState extends State<GroceryList> {
     _loadItems();
   }
 
-  void _loadItems({String searchQuery = ''}) async {
+  Future<void> _loadItems({String searchQuery = ''}) async {
     Map<String, dynamic> queryParams = {};
 
     if (searchQuery.isNotEmpty) {
@@ -263,65 +263,69 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     if (_filteredItems.isNotEmpty) {
-      content = ListView.builder(
-        itemCount: _filteredItems.length,
-        itemBuilder: (ctx, index) {
-          return Dismissible(
-            key: ValueKey(_filteredItems[index].id),
-            background: Container(
-              color: Theme.of(context).colorScheme.error,
-              margin: const EdgeInsets.symmetric(
-                horizontal: 16.0,
+      content = RefreshIndicator(
+        onRefresh: _loadItems,
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemCount: _filteredItems.length,
+          itemBuilder: (ctx, index) {
+            return Dismissible(
+              key: ValueKey(_filteredItems[index].id),
+              background: Container(
+                color: Theme.of(context).colorScheme.error,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                ),
               ),
-            ),
-            onDismissed: (direction) {
-              _removeItem(_filteredItems[index]);
-            },
-            confirmDismiss: (direction) async {
-              return await showDialog<bool>(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        title: const Text('Remove item'),
-                        content: const Text(
-                            'Are you sure you want to remove this item?'),
-                        actions: [
-                          TextButton(
-                            child: const Text(
-                              "Cancel",
-                            ),
-                            onPressed: () => Navigator.of(context).pop(false),
-                          ),
-                          TextButton(
-                            child: const Text(
-                              "Remove item",
-                              style: TextStyle(color: Colors.red),
-                            ),
-                            onPressed: () => Navigator.of(context).pop(true),
-                          ),
-                        ],
-                      );
-                    },
-                  ) ??
-                  false;
-            },
-            child: ListTile(
-              leading: Container(
-                width: 24,
-                height: 24,
-                color: _filteredItems[index].category.color,
-              ),
-              title: Text(_filteredItems[index].name),
-              trailing: Text(
-                _filteredItems[index].quantity.toString(),
-                style: const TextStyle(fontSize: 15.0),
-              ),
-              onTap: () {
-                _editItem(_filteredItems[index]);
+              onDismissed: (direction) {
+                _removeItem(_filteredItems[index]);
               },
-            ),
-          );
-        },
+              confirmDismiss: (direction) async {
+                return await showDialog<bool>(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Remove item'),
+                          content: const Text(
+                              'Are you sure you want to remove this item?'),
+                          actions: [
+                            TextButton(
+                              child: const Text(
+                                "Cancel",
+                              ),
+                              onPressed: () => Navigator.of(context).pop(false),
+                            ),
+                            TextButton(
+                              child: const Text(
+                                "Remove item",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                              onPressed: () => Navigator.of(context).pop(true),
+                            ),
+                          ],
+                        );
+                      },
+                    ) ??
+                    false;
+              },
+              child: ListTile(
+                leading: Container(
+                  width: 24,
+                  height: 24,
+                  color: _filteredItems[index].category.color,
+                ),
+                title: Text(_filteredItems[index].name),
+                trailing: Text(
+                  _filteredItems[index].quantity.toString(),
+                  style: const TextStyle(fontSize: 15.0),
+                ),
+                onTap: () {
+                  _editItem(_filteredItems[index]);
+                },
+              ),
+            );
+          },
+        ),
       );
     }
 

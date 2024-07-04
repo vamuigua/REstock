@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 import 'package:shopping_list/data/categories.dart';
 // import 'package:shopping_list/data/dummy_items.dart';
@@ -263,7 +264,11 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     if (_filteredItems.isNotEmpty) {
-      content = RefreshIndicator(
+      content = LiquidPullToRefresh(
+        animSpeedFactor: 2.0,
+        color: Theme.of(context).colorScheme.onBackground,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        showChildOpacityTransition: false,
         onRefresh: _loadItems,
         child: ListView.builder(
           physics: const AlwaysScrollableScrollPhysics(),

@@ -89,6 +89,7 @@ class _NewItemState extends State<NewItem> {
                     onSaved: (value) {
                       _enteredName = value.toString();
                     },
+                    textCapitalization: TextCapitalization.sentences,
                     maxLength: 50,
                     decoration: const InputDecoration(
                       label: Text("Name"),

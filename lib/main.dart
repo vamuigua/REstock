@@ -11,6 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'REstock',
       theme: ThemeData.dark().copyWith(
         colorScheme: ColorScheme.fromSeed(

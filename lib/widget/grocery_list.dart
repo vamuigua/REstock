@@ -8,6 +8,7 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:shopping_list/data/categories.dart';
 // import 'package:shopping_list/data/dummy_items.dart';
 import 'package:shopping_list/models/grocery_item.dart';
+import 'package:shopping_list/services/database_service.dart';
 import 'package:shopping_list/widget/new_item.dart';
 import 'package:shopping_list/widget/edit_item.dart';
 import 'package:shopping_list/widget/custom_search_bar.dart';
@@ -20,6 +21,7 @@ class GroceryList extends StatefulWidget {
 }
 
 class _GroceryListState extends State<GroceryList> {
+  final DatabaseService _databaseService = DatabaseService.instance;
   List<GroceryItem> _groceryItems = [];
   List<GroceryItem> _filteredItems = [];
   var _isLoading = true;
@@ -30,6 +32,9 @@ class _GroceryListState extends State<GroceryList> {
   @override
   void initState() {
     super.initState();
+
+    _databaseService.getItems();
+
     _loadItems();
   }
 
@@ -167,6 +172,9 @@ class _GroceryListState extends State<GroceryList> {
       _filteredItems.remove(item);
       _groceryItems.remove(item);
     });
+
+    // Delete the item from the local DB
+    _databaseService.deleteItem(item.id);
 
     final url = Uri.https(
       "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",

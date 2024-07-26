@@ -1,13 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/services/database_service.dart';
+import 'package:shopping_list/services/firebase_service.dart';
 
 class EditItem extends StatefulWidget {
   const EditItem({
@@ -23,6 +20,7 @@ class EditItem extends StatefulWidget {
 
 class _EditItemState extends State<EditItem> {
   final DatabaseService _databaseService = DatabaseService.instance;
+  final FirebaseService _firebaseService = const FirebaseService();
   final _formKey = GlobalKey<FormState>();
   var _isSending = false;
   late String _enteredName;
@@ -53,23 +51,14 @@ class _EditItemState extends State<EditItem> {
         firebaseId: widget.groceryItem.firebaseId,
       );
 
-      _databaseService.updateItem(updatedItem);
-
       try {
-        final url = Uri.https(
-            "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
-            "shopping-list/${widget.groceryItem.id}.json");
+        _databaseService.updateItem(updatedItem);
 
-        await http.patch(
-          url,
-          headers: {"Content-type": "application/json"},
-          body: json.encode(
-            {
-              'name': _enteredName,
-              'quantity': _enteredQuantity,
-              'category': _selectedCategory.title,
-            },
-          ),
+        _firebaseService.updateItem(
+          widget.groceryItem.firebaseId,
+          _enteredName,
+          _enteredQuantity,
+          _selectedCategory.title,
         );
 
         if (!context.mounted) {

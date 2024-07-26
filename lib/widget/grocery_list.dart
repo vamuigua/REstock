@@ -1,14 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
-import 'package:http/http.dart' as http;
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
-import 'package:shopping_list/data/categories.dart';
-// import 'package:shopping_list/data/dummy_items.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/services/database_service.dart';
+import 'package:shopping_list/services/firebase_service.dart';
 import 'package:shopping_list/widget/new_item.dart';
 import 'package:shopping_list/widget/edit_item.dart';
 import 'package:shopping_list/widget/custom_search_bar.dart';
@@ -22,6 +18,7 @@ class GroceryList extends StatefulWidget {
 
 class _GroceryListState extends State<GroceryList> {
   final DatabaseService _databaseService = DatabaseService.instance;
+  final FirebaseService _firebaseService = const FirebaseService();
   List<GroceryItem> _groceryItems = [];
   List<GroceryItem> _filteredItems = [];
   var _isLoading = true;
@@ -32,63 +29,12 @@ class _GroceryListState extends State<GroceryList> {
   @override
   void initState() {
     super.initState();
-
-    _databaseService.getItems();
-
     _loadItems();
   }
 
-  Future<void> _loadItems({String searchQuery = ''}) async {
-    Map<String, dynamic> queryParams = {};
-
-    if (searchQuery.isNotEmpty) {
-      queryParams = {
-        'orderBy': jsonEncode("name"),
-        'startAt': jsonEncode(searchQuery),
-        'endAt': jsonEncode("$searchQuery\uf8ff"),
-      };
-    }
-
-    final url = Uri.https(
-      "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
-      "shopping-list.json",
-      queryParams,
-    );
-
+  Future<void> _loadItems() async {
     try {
-      final response = await http.get(url);
-
-      if (response.statusCode >= 400) {
-        setState(() {
-          _error = "❌ Failed to fetch data. Please try again later.";
-        });
-      }
-
-      if (response.body == 'null') {
-        setState(() {
-          _isLoading = false;
-        });
-
-        return;
-      }
-
-      final Map<String, dynamic> listData = json.decode(response.body);
-
-      final List<GroceryItem> loadedItems = [];
-
-      for (final item in listData.entries) {
-        final category = categories.entries
-            .firstWhere(
-                (category) => category.value.title == item.value['category'])
-            .value;
-
-        loadedItems.add(GroceryItem(
-          id: item.key,
-          name: item.value['name'],
-          quantity: item.value['quantity'],
-          category: category,
-        ));
-      }
+      final List<GroceryItem> loadedItems = await _databaseService.getItems();
 
       setState(() {
         _groceryItems = loadedItems;
@@ -173,41 +119,21 @@ class _GroceryListState extends State<GroceryList> {
       _groceryItems.remove(item);
     });
 
-    // Delete the item from the local DB
-    _databaseService.deleteItem(item.id);
-
-    final url = Uri.https(
-      "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
-      "shopping-list/${item.id}.json",
-    );
-
     try {
-      final response = await http.delete(url);
+      _databaseService.deleteItem(item.id);
+      _firebaseService.deleteItem(item.firebaseId);
 
       if (!context.mounted) {
         return;
       }
 
-      if (response.statusCode >= 400) {
-        setState(() {
-          _filteredItems.insert(itemIndex, item);
-        });
-
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("❌ Something went wrong! Try again later."),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(seconds: 2),
-            content: Text("✅ Item removed."),
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          duration: Duration(seconds: 2),
+          content: Text("✅ Item removed."),
+        ),
+      );
     } catch (e) {
       setState(() {
         _filteredItems.insert(itemIndex, item);
@@ -241,26 +167,20 @@ class _GroceryListState extends State<GroceryList> {
 
   @override
   Widget build(BuildContext context) {
-    Widget content = Center(
+    Widget content = const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.shopping_basket_outlined, size: 50),
-          const SizedBox(height: 2),
-          const Text(
+          Icon(Icons.shopping_basket_outlined, size: 50),
+          SizedBox(height: 2),
+          Text(
             'No items found.',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 10),
-          const Text("Click on the '+' button to get started!"),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: _addItem,
-            child: const Icon(Icons.add),
-          ),
+          SizedBox(height: 10),
         ],
       ),
     );

@@ -46,42 +46,30 @@ class DatabaseService {
     return database;
   }
 
-  Future<int> addItem(String name, int quantity, String category) async {
-    final db = await database;
-    final itemId = await db.insert(
-      tableShoppingList,
-      {
-        'name': name,
-        'quantity': quantity,
-        'category': category,
-      },
-    );
-
-    return itemId;
-  }
-
   Future<List<GroceryItem>> getItems() async {
     final db = await database;
     final result = await db.query(tableShoppingList);
     return result.map((item) => GroceryItem.fromMap(item)).toList();
   }
 
+  Future<int> addItem(GroceryItem item) async {
+    final db = await database;
+    final itemId = await db.insert(tableShoppingList, item.toMap());
+
+    return itemId;
+  }
+
   void updateItem(GroceryItem item) async {
     final db = await database;
     await db.update(
       tableShoppingList,
-      {
-        columnName: item.name,
-        columnQuantity: item.quantity,
-        columnCategory: item.category.title,
-        columnFirebaseId: item.firebaseId,
-      },
+      item.toMap(),
       where: "$columnId = ?",
       whereArgs: [item.id],
     );
   }
 
-  void deleteItem(String id) async {
+  void deleteItem(int id) async {
     final db = await database;
     await db.delete(
       tableShoppingList,

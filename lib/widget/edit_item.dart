@@ -4,7 +4,6 @@ import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/services/database_service.dart';
-import 'package:shopping_list/services/firebase_service.dart';
 
 class EditItem extends StatefulWidget {
   const EditItem({
@@ -20,7 +19,6 @@ class EditItem extends StatefulWidget {
 
 class _EditItemState extends State<EditItem> {
   final DatabaseService _databaseService = DatabaseService.instance;
-  final FirebaseService _firebaseService = const FirebaseService();
   final _formKey = GlobalKey<FormState>();
   var _isSending = false;
   late String _enteredName;
@@ -43,23 +41,16 @@ class _EditItemState extends State<EditItem> {
         _isSending = true;
       });
 
-      final updatedItem = GroceryItem(
-        id: widget.groceryItem.id,
-        name: _enteredName,
-        quantity: _enteredQuantity,
-        category: _selectedCategory,
-        firebaseId: widget.groceryItem.firebaseId,
-      );
-
       try {
-        _databaseService.updateItem(updatedItem);
-
-        _firebaseService.updateItem(
-          widget.groceryItem.firebaseId,
-          _enteredName,
-          _enteredQuantity,
-          _selectedCategory.title,
+        final updatedItem = GroceryItem(
+          id: widget.groceryItem.id,
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory,
+          firebaseId: widget.groceryItem.firebaseId,
         );
+
+        _databaseService.updateItem(updatedItem);
 
         if (!context.mounted) {
           return;

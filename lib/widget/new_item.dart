@@ -4,7 +4,6 @@ import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/services/database_service.dart';
-import 'package:shopping_list/services/firebase_service.dart';
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -15,7 +14,6 @@ class NewItem extends StatefulWidget {
 
 class _NewItemState extends State<NewItem> {
   final DatabaseService _databaseService = DatabaseService.instance;
-  final FirebaseService _firebaseService = const FirebaseService();
   final _formKey = GlobalKey<FormState>();
   var _enteredName = "";
   var _enteredQuantity = 1;
@@ -31,33 +29,21 @@ class _NewItemState extends State<NewItem> {
       });
 
       try {
-        final itemId = await _databaseService.addItem(
-          _enteredName,
-          _enteredQuantity,
-          _selectedCategory.title,
-        );
-
-        final resData = await _firebaseService.addItem(
-          _enteredName,
-          _enteredQuantity,
-          _selectedCategory.title,
-        );
-
         final item = GroceryItem(
-          id: itemId.toString(),
           name: _enteredName,
           quantity: _enteredQuantity,
           category: _selectedCategory,
-          firebaseId: resData['name'] ?? '',
         );
 
-        _databaseService.updateItem(item);
+        int itemId = await _databaseService.addItem(item);
+
+        GroceryItem updatedItem = item.copyWith(id: itemId);
 
         if (!context.mounted) {
           return;
         }
 
-        Navigator.of(context).pop(item);
+        Navigator.of(context).pop(updatedItem);
       } catch (e) {
         setState(() {
           _isSending = false;

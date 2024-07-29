@@ -54,7 +54,10 @@ class DatabaseService {
 
   Future<int> addItem(GroceryItem item) async {
     final db = await database;
-    final itemId = await db.insert(tableShoppingList, item.toMap());
+    final itemId = await db.insert(
+      tableShoppingList,
+      item.toMap()..remove(columnId),
+    );
 
     return itemId;
   }
@@ -63,7 +66,7 @@ class DatabaseService {
     final db = await database;
     await db.update(
       tableShoppingList,
-      item.toMap(),
+      item.toMap()..remove(columnId),
       where: "$columnId = ?",
       whereArgs: [item.id],
     );

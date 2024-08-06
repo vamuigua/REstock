@@ -17,8 +17,10 @@ class GroceryList extends StatefulWidget {
 
 class _GroceryListState extends State<GroceryList> {
   final DatabaseService _databaseService = DatabaseService.instance;
+
   List<GroceryItem> _groceryItems = [];
   List<GroceryItem> _filteredItems = [];
+
   var _isLoading = true;
   String? _error;
 
@@ -134,6 +136,7 @@ class _GroceryListState extends State<GroceryList> {
     } catch (e) {
       setState(() {
         _filteredItems.insert(itemIndex, item);
+        _groceryItems.insert(itemIndex, item);
       });
 
       ScaffoldMessenger.of(context).clearSnackBars();

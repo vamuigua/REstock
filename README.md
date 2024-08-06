@@ -64,9 +64,8 @@ While building REstock, I gained valuable experience and encountered various cha
 - [x] UI: Move "Add item" icon to bottom navigation bar for easier reach
 - [x] feat: Quickly find items using search functionality
 - [x] feat: Ability to pull-down to refresh data
-- [ ] feat: Filtering by category
-- [ ] feat: Ability to sync local storage & online data
-- [ ] feat: Create multiple shopping lists
+- [ ] feat: Store data on device as the primary storage **(In Progress)**
+- [ ] feat: Ability to sync local data to firebase
 - [ ] feat: Mark items as purchased to keep your lists up-to-date
 - [ ] feat: Set reminders for important items or lists
 - [ ] feat: Ability to create custom categories

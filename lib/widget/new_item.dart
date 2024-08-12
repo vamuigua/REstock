@@ -1,12 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
 import 'package:shopping_list/models/grocery_item.dart';
+import 'package:shopping_list/services/database_service.dart';
 
 class NewItem extends StatefulWidget {
   const NewItem({super.key});
@@ -16,6 +13,7 @@ class NewItem extends StatefulWidget {
 }
 
 class _NewItemState extends State<NewItem> {
+  final DatabaseService _databaseService = DatabaseService.instance;
   final _formKey = GlobalKey<FormState>();
   var _enteredName = "";
   var _enteredQuantity = 1;
@@ -30,35 +28,30 @@ class _NewItemState extends State<NewItem> {
         _isSending = true;
       });
 
-      final url = Uri.https(
-          "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
-          "shopping-list.json");
-
       try {
-        final response = await http.post(url,
-            headers: {"Content-type": "application/json"},
-            body: json.encode({
-              'name': _enteredName,
-              'quantity': _enteredQuantity,
-              'category': _selectedCategory.title,
-            }));
+        final item = GroceryItem(
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory,
+        );
 
-        final Map<String, dynamic> resData = json.decode(response.body);
+        int itemId = await _databaseService.addItem(item);
+
+        GroceryItem updatedItem = item.copyWith(id: itemId);
 
         if (!context.mounted) {
           return;
         }
 
-        Navigator.of(context).pop(GroceryItem(
-          id: resData['name'],
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory,
-        ));
+        Navigator.of(context).pop(updatedItem);
       } catch (e) {
         setState(() {
           _isSending = false;
         });
+
+        if (!context.mounted) {
+          return;
+        }
 
         ScaffoldMessenger.of(context).clearSnackBars();
         ScaffoldMessenger.of(context).showSnackBar(

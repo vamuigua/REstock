@@ -1,12 +1,9 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
-import 'package:http/http.dart' as http;
 
 import 'package:shopping_list/models/grocery_item.dart';
 import 'package:shopping_list/data/categories.dart';
 import 'package:shopping_list/models/category.dart';
+import 'package:shopping_list/services/database_service.dart';
 
 class EditItem extends StatefulWidget {
   const EditItem({
@@ -21,6 +18,7 @@ class EditItem extends StatefulWidget {
 }
 
 class _EditItemState extends State<EditItem> {
+  final DatabaseService _databaseService = DatabaseService.instance;
   final _formKey = GlobalKey<FormState>();
   var _isSending = false;
   late String _enteredName;
@@ -43,33 +41,22 @@ class _EditItemState extends State<EditItem> {
         _isSending = true;
       });
 
-      final url = Uri.https(
-          "restock-cc312-default-rtdb.asia-southeast1.firebasedatabase.app",
-          "shopping-list/${widget.groceryItem.id}.json");
-
       try {
-        await http.patch(
-          url,
-          headers: {"Content-type": "application/json"},
-          body: json.encode(
-            {
-              'name': _enteredName,
-              'quantity': _enteredQuantity,
-              'category': _selectedCategory.title,
-            },
-          ),
+        final updatedItem = GroceryItem(
+          id: widget.groceryItem.id,
+          name: _enteredName,
+          quantity: _enteredQuantity,
+          category: _selectedCategory,
+          firebaseId: widget.groceryItem.firebaseId,
         );
+
+        _databaseService.updateItem(updatedItem);
 
         if (!context.mounted) {
           return;
         }
 
-        Navigator.of(context).pop(GroceryItem(
-          id: widget.groceryItem.id,
-          name: _enteredName,
-          quantity: _enteredQuantity,
-          category: _selectedCategory,
-        ));
+        Navigator.of(context).pop(updatedItem);
       } catch (e) {
         setState(() {
           _isSending = false;

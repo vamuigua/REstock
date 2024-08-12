@@ -7,6 +7,7 @@ class GroceryItem {
   final int quantity;
   final Category category;
   final String? firebaseId;
+  final int listId;
 
   const GroceryItem({
     this.id,
@@ -14,6 +15,7 @@ class GroceryItem {
     required this.quantity,
     required this.category,
     this.firebaseId,
+    required this.listId,
   });
 
   factory GroceryItem.fromMap(Map<String, dynamic> map) {
@@ -27,6 +29,7 @@ class GroceryItem {
       quantity: map['quantity'],
       category: category,
       firebaseId: map['firebase_id'],
+      listId: map['list_id'],
     );
   }
 
@@ -37,6 +40,7 @@ class GroceryItem {
       'quantity': quantity,
       'category': category.title,
       'firebase_id': firebaseId,
+      'list_id': listId,
     };
   }
 
@@ -46,6 +50,7 @@ class GroceryItem {
     int? quantity,
     Category? category,
     String? firebaseId,
+    int? listId,
   }) {
     return GroceryItem(
       id: id ?? this.id,
@@ -53,6 +58,7 @@ class GroceryItem {
       quantity: quantity ?? this.quantity,
       category: category ?? this.category,
       firebaseId: firebaseId ?? this.firebaseId,
+      listId: listId ?? this.listId,
     );
   }
 }

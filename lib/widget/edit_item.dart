@@ -48,6 +48,7 @@ class _EditItemState extends State<EditItem> {
           quantity: _enteredQuantity,
           category: _selectedCategory,
           firebaseId: widget.groceryItem.firebaseId,
+          listId: 1 // TODO: Change to shopping_list id
         );
 
         _databaseService.updateItem(updatedItem);

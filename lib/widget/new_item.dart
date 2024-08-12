@@ -33,6 +33,7 @@ class _NewItemState extends State<NewItem> {
           name: _enteredName,
           quantity: _enteredQuantity,
           category: _selectedCategory,
+          listId: 1 // TODO: Change to shopping_list id
         );
 
         int itemId = await _databaseService.addItem(item);

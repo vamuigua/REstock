@@ -171,7 +171,7 @@ class _GroceryListState extends State<GroceryList> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.shopping_basket_outlined, size: 50),
+          Icon(Icons.shopping_cart_outlined, size: 50),
           SizedBox(height: 2),
           Text(
             'No items found.',
@@ -269,27 +269,13 @@ class _GroceryListState extends State<GroceryList> {
     }
 
     return Scaffold(
-      bottomNavigationBar: BottomAppBar(
-        color: Theme.of(context).colorScheme.background,
-        shape: const CircularNotchedRectangle(),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            ElevatedButton(
-              onPressed: _addItem,
-              style: ElevatedButton.styleFrom(
-                fixedSize: const Size(200, 200),
-                shape: const CircleBorder(),
-                foregroundColor: Colors.white,
-                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              ),
-              child: const Icon(Icons.add, size: 30.0),
-            )
-          ],
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addItem,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        child: const Icon(Icons.add),
       ),
       appBar: AppBar(
-        title: const Text('REstock'),
+        title: const Text('Shopping List Name'),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       ),
       body: Column(
